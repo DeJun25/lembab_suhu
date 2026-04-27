@@ -1,6 +1,9 @@
 @extends('layouts.app')
 
 @section('title', 'Dashboard')
+@section('breadcrumb')
+    <span class="text-muted fw-light">Page /</span> Dashboard
+@endsection
 
 @section('content')
     <div class="container-xxl flex-grow-1 container-p-y">
@@ -104,22 +107,16 @@
             <!--/ Order Statistics -->
             <div class="col-12">
                 <div class="card">
-                    {{-- <div class="card-header d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0">Realtime Sensor Chart</h5>
-                        <a class="btn btn-sm btn-success" href="{{ route('export_sensor') }}">
-                            Export Excel
-                        </a>
-                    </div> --}}
                     <div class="card-header d-flex justify-content-between align-items-center">
                         <h5 class="mb-0">Realtime Sensor Chart</h5>
                         <form action="{{ route('export_sensor') }}" method="GET" class="d-flex align-items-end gap-2">
                             <div>
                                 <label class="form-label small">Start Date</label>
-                                <input type="date" name="start_date" class="form-control form-control-sm" required>
+                                <input type="date" name="start_date" id="start_date" class="form-control form-control-sm" required>
                             </div>
                             <div>
                                 <label class="form-label small">End Date</label>
-                                <input type="date" name="end_date" class="form-control form-control-sm" required>
+                                <input type="date" name="end_date" id="end_date" class="form-control form-control-sm" required>
                             </div>
                             <button type="submit" class="btn btn-sm btn-success">
                                 <i class="bx bx-file me-1"></i> Export Excel

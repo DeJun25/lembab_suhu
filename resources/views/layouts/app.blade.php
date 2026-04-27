@@ -61,8 +61,6 @@
 
                 <div class="content-wrapper">
                     @yield('content')
-
-                    @include('partials.footer')
                 </div>
             </div>
         </div>
@@ -89,6 +87,27 @@
 
     <!-- Place this tag in your head or just before your close body tag. -->
     <script async defer src="https://buttons.github.io/buttons.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const startDateInput = document.getElementById('start_date');
+            const endDateInput = document.getElementById('end_date');
+
+            startDateInput.addEventListener('change', function() {
+                if (this.value) {
+                    endDateInput.disabled = false;
+
+                    endDateInput.min = this.value;
+
+                    if (endDateInput.value && endDateInput.value < this.value) {
+                        endDateInput.value = this.value;
+                    }
+                } else {
+                    endDateInput.disabled = true;
+                    endDateInput.value = '';
+                }
+            });
+        });
+    </script>
     @stack('scripts')
 </body>
 

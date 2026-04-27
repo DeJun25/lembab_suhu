@@ -1,17 +1,21 @@
 @extends('layouts.app')
 
 @section('title', 'Manage Users')
+@section('breadcrumb')
+    <span class="text-muted fw-light">Page /</span> Manage Users
+@endsection
 
 @section('content')
     <div class="container-xxl flex-grow-1 container-p-y">
-        {{-- <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Tables /</span> Basic Tables</h4> --}}
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
-                <h5>Manage Users</h5>
-                <button class="btn btn-primary" onclick="openAddModal()">
-                    <i class="pb-1 tf-icons bx bx-plus"></i>Add User</button>
+                <h5>Table Users</h5>
+                @if (auth()->user()->role === 'super_admin')
+                    <button class="btn btn-primary" onclick="openAddModal()">
+                        <i class="pb-1 tf-icons bx bx-plus"></i>Add User</button>
+                @endif
             </div>
-            <div class="table-responsive text-nowrap">
+            <div class="table-responsive text-nowrap mx-3">
                 <table class="table">
                     <thead>
                         <tr>
@@ -19,7 +23,9 @@
                             <th>Name</th>
                             <th>Email</th>
                             <th>Role</th>
-                            <th>Actions</th>
+                            @if(auth()->user()->role === 'super_admin')
+                                <th>Actions</th>
+                            @endif
                         </tr>
                     </thead>
                     <tbody id="user-table">
@@ -86,6 +92,8 @@
 
     <script>
         let currentPage = 1;
+
+        const isSuperAdmin = "{{ auth()->user()->role === 'super_admin' ? true : false}}";
 
         document.getElementById('userForm').addEventListener('submit', function(e) {
             e.preventDefault();
@@ -187,22 +195,27 @@
                         rows = `<tr><td colspan="5" class="text-center">No data</td></tr>`;
                     } else {
                         data.data.forEach((user, index) => {
+                            let actionButtons = '';
+
+                            if (isSuperAdmin) {
+                                actionButtons = `
+                                    <div class="d-flex gap-1">
+                                        <button class="btn btn-icon btn-sm btn-outline-warning" onclick="editUser(${user.id})">
+                                            <i class="bx bx-edit-alt"></i>
+                                        </button>
+                                        <button class="btn btn-icon btn-sm btn-outline-danger" onclick="deleteUser(${user.id})">
+                                            <i class="bx bx-trash"></i>
+                                        </button>
+                                    </div>`;
+                            }
+
                             rows += `
                                 <tr>
                                     <td>${(data.from ?? 0) + index}</td>
                                     <td>${user.name}</td>
                                     <td>${user.email}</td>
                                     <td>${user.role}</td>
-                                    <td>
-                                        <div class="d-flex gap-1">
-                                            <button class="btn btn-icon btn-sm btn-outline-warning" onclick="editUser(${user.id})">
-                                                <i class="bx bx-edit-alt"></i>
-                                            </button>
-                                            <button class="btn btn-icon btn-sm btn-outline-danger" onclick="deleteUser(${user.id})">
-                                                <i class="bx bx-trash"></i>
-                                            </button>
-                                        </div>
-                                    </td>
+                                    <td>${actionButtons}</td>
                                 </tr>
                             `;
                         });

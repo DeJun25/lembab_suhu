@@ -2,18 +2,36 @@
 
 @section('title', 'Log Sensor')
 
+@section('breadcrumb')
+    <span class="text-muted fw-light">Page /</span> Log Sensor
+@endsection
+
 @section('content')
     <div class="container-xxl flex-grow-1 container-p-y">
-        {{-- <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Tables /</span> Basic Tables</h4> --}}
         <div class="card">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <h5>Manage Sensor Data</h5>
+            <div class="card-header d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+                <h5>Table Sensor Data</h5>
+
+                <form action="{{ route('export_sensor') }}" method="GET" class="d-flex align-items-end gap-2">
+                    <div>
+                        <label class="form-label small mb-1">Start Date</label>
+                        <input type="date" name="start_date" id="start_date" class="form-control form-control-sm" required>
+                    </div>
+                    <div>
+                        <label class="form-label small mb-1">End Date</label>
+                        <input type="date" name="end_date" id="end_date" class="form-control form-control-sm" required>
+                    </div>
+                    <button type="submit" class="btn btn-sm btn-success">
+                        <i class="bx bx-file me-1"></i> Export Excel
+                    </button>
+                </form>
             </div>
-            <div class="table-responsive text-nowrap">
-                <table class="table">
+
+            <div class="table-responsive text-nowrap px-3">
+                <table class="table table-hover">
                     <thead>
                         <tr>
-                            <th>No</th>
+                            <th width="50">No</th>
                             <th>Time Created</th>
                             <th>Humidity</th>
                             <th>Temperature</th>
@@ -21,10 +39,13 @@
                         </tr>
                     </thead>
                     <tbody id="sensor-table">
+                        <tr>
+                            <td colspan="5" class="text-center py-4">Loading data...</td>
+                        </tr>
                     </tbody>
                 </table>
 
-                <div class="m-2" id="pagination-links">
+                <div class="mt-3 d-flex justify-content-center" id="pagination-links">
                 </div>
             </div>
         </div>
@@ -33,106 +54,103 @@
     <script>
         let currentPage = 1;
 
-        function deleteUser(id) {
-            if (!confirm('Yakin mau hapus user ini?')) return;
-
-            fetch(`/users/${id}`, {
-                    method: 'DELETE',
-                    headers: {
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                        'Accept': 'application/json'
-                    }
-                })
-                .then(async res => {
-                    let data = await res.json();
-
-                    if (!res.ok) {
-                        alert(data.message || 'Gagal hapus user');
-                        return;
-                    }
-
-                    loadUsers(currentPage);
-                })
-                .catch(err => console.error(err));
-        }
-
-        function loadUsers(page = currentPage) {
+        /**
+         * Load data sensor dari server
+         */
+        function loadSensorData(page = 1) {
             currentPage = page;
+            const tableBody = document.getElementById('sensor-table');
+            const paginationContainer = document.getElementById('pagination-links');
+
             fetch(`/data-sensor?page=${page}`)
                 .then(res => res.json())
                 .then(data => {
                     let rows = '';
 
-                    if (data.data.length === 0) {
-                        rows = `<tr><td colspan="5" class="text-center">No data</td></tr>`;
+                    if (!data.data || data.data.length === 0) {
+                        rows = `<tr><td colspan="5" class="text-center py-4">No data available</td></tr>`;
                     } else {
                         data.data.forEach((sensor, index) => {
-                            let date = new Date(sensor.created_at);
-                            let formattedDate = date.toLocaleDateString('id-ID', {
+                            // Format Tanggal
+                            const date = new Date(sensor.created_at);
+                            const formattedDate = date.toLocaleDateString('id-ID', {
                                 day: '2-digit',
                                 month: 'short',
                                 year: 'numeric',
                                 hour: '2-digit',
                                 minute: '2-digit'
                             });
-                            let tempClass = sensor.temperature > 35 ? 'text-danger fw-bold' : 'text-dark';
+
+                            // Logika Warna Temperature
+                            const tempClass = sensor.temperature > 35 ? 'text-danger fw-bold' : 'text-dark';
+
+                            // Logika Badge Soil Moisture
+                            const soilBadge = sensor.soil_moisture < 30 ? 'bg-label-warning' :
+                                'bg-label-success';
+
                             rows += `
-                                <tr>
-                                    <td><span class="text-muted">${(data.from ?? 0) + index}</span></td>
-                                    <td><small>${formattedDate}</small></td>
-                                    <td>
-                                        <div class="d-flex align-items-center">
-                                            <span class="me-2">${sensor.humidity}%</span>
-                                        </div>
-                                    </td>
-                                    <td><span class="${tempClass}">${sensor.temperature}°C</span></td>
-                                    <td>
-                                        <span class="badge bg-label-${sensor.soil_moisture < 30 ? 'warning' : 'success'}">
-                                            ${sensor.soil_moisture}%
-                                        </span>
-                                    </td>
-                                </tr>
-                            `;
+                            <tr>
+                                <td><span class="text-muted">${(data.from ?? 0) + index}</span></td>
+                                <td><small class="text-nowrap">${formattedDate}</small></td>
+                                <td>${sensor.humidity}%</td>
+                                <td><span class="${tempClass}">${sensor.temperature}°C</span></td>
+                                <td>
+                                    <span class="badge ${soilBadge}">
+                                        ${sensor.soil_moisture}%
+                                    </span>
+                                </td>
+                            </tr>
+                        `;
                         });
                     }
 
-                    document.getElementById('sensor-table').innerHTML = rows;
-
-                    let pagination = `<ul class="pagination">`;
-
-                    data.links.forEach(link => {
-                        let label = link.label
-                            .replace(/&laquo;/g, '«')
-                            .replace(/&raquo;/g, '»');
-
-                        if (link.url === null) {
-                            pagination += `
-                        <li class="page-item disabled">
-                            <span class="page-link">${label}</span>
-                        </li>
-                    `;
-                        } else {
-                            let page = new URL(link.url).searchParams.get("page");
-
-                            pagination += `
-                        <li class="page-item ${link.active ? 'active' : ''}">
-                            <button class="page-link" onclick="loadUsers(${page})">
-                                ${label}
-                            </button>
-                        </li>
-                    `;
-                        }
-                    });
-
-                    pagination += `</ul>`;
-
-                    document.getElementById('pagination-links').innerHTML = pagination;
+                    tableBody.innerHTML = rows;
+                    renderPagination(data.links);
                 })
                 .catch(err => {
-                    console.error(err);
+                    console.error("Error loading data:", err);
+                    tableBody.innerHTML =
+                        `<tr><td colspan="5" class="text-center text-danger">Error loading data.</td></tr>`;
                 });
         }
 
-        loadUsers(currentPage);
+        /**
+         * Render links pagination
+         */
+        function renderPagination(links) {
+            if (!links || links.length <= 3) {
+                document.getElementById('pagination-links').innerHTML = '';
+                return;
+            }
+
+            let paginationHtml = `<ul class="pagination pagination-sm">`;
+
+            links.forEach(link => {
+                let label = link.label.replace(/&laquo;/g, '«').replace(/&raquo;/g, '»');
+
+                if (link.url === null) {
+                    paginationHtml += `
+                    <li class="page-item disabled">
+                        <span class="page-link">${label}</span>
+                    </li>`;
+                } else {
+                    const pageNumber = new URL(link.url).searchParams.get("page");
+                    paginationHtml += `
+                    <li class="page-item ${link.active ? 'active' : ''}">
+                        <button class="page-link" onclick="loadSensorData(${pageNumber})">
+                            ${label}
+                        </button>
+                    </li>`;
+                }
+            });
+
+            paginationHtml += `</ul>`;
+            document.getElementById('pagination-links').innerHTML = paginationHtml;
+        }
+
+        // Initial Load
+        document.addEventListener('DOMContentLoaded', () => {
+            loadSensorData(currentPage);
+        });
     </script>
 @endsection
