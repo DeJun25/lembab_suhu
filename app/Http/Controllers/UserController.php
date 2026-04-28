@@ -44,7 +44,7 @@ class UserController extends Controller
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
-            'password' => Hash::make($request->name . '12345'),
+            'password' => Hash::make(strtolower(str_replace(' ', '', $request->name)) . '12345'),
             'phone' => $request->phone,
             'role' => $request->role,
         ]);
@@ -60,7 +60,7 @@ class UserController extends Controller
 
         $request->validate([
             'name' => 'sometimes|required|string|max:255',
-            'email' => 'sometimes|required|email' . $id,
+            'email' => 'sometimes|required|email|unique:users,email,' . $id,
             'phone' => 'nullable|string|max:20',
             'role' => 'sometimes|required|in:admin,super_admin'
         ]);
@@ -78,6 +78,7 @@ class UserController extends Controller
         $user->delete();
         return response()->json(['message' => 'User deleted successfully']);
     }
+    
     public function profile()
     {
         return view('pages.profile.index');

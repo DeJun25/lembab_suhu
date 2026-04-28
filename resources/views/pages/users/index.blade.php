@@ -23,7 +23,7 @@
                             <th>Name</th>
                             <th>Email</th>
                             <th>Role</th>
-                            @if(auth()->user()->role === 'super_admin')
+                            @if (auth()->user()->role === 'super_admin')
                                 <th>Actions</th>
                             @endif
                         </tr>
@@ -93,14 +93,13 @@
     <script>
         let currentPage = 1;
 
-        const isSuperAdmin = "{{ auth()->user()->role === 'super_admin' ? true : false}}";
+        const isSuperAdmin = "{{ auth()->user()->role === 'super_admin' ? true : false }}";
 
         document.getElementById('userForm').addEventListener('submit', function(e) {
             e.preventDefault();
 
             let form = this;
             let formData = new FormData(form);
-
             let id = document.getElementById('user_id').value;
             let url = id ? `/users/${id}` : `/users`;
 
@@ -116,23 +115,34 @@
                     body: formData
                 })
                 .then(async res => {
-                    let data = await res.json();
-
                     if (!res.ok) {
-                        console.error(data);
-                        alert("Error: " + (data.message || "Validation gagal"));
-                        return;
+                        let errorData = await res.json().catch(() => ({
+                            message: 'Terjadi kesalahan server'
+                        }));
+                        throw new Error(errorData.message || 'Gagal menyimpan data');
                     }
+                    return res.json();
+                })
+                .then(data => {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Berhasil!',
+                        text: data.message || 'Data berhasil disimpan.',
+                    });
 
                     let modal = bootstrap.Modal.getInstance(document.getElementById('userModal'));
                     modal.hide();
-
                     form.reset();
                     document.getElementById('user_id').value = '';
-
                     loadUsers(currentPage);
                 })
-                .catch(err => console.error(err));
+                .catch(err => {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Gagal!',
+                        text: err.message,
+                    });
+                });
         });
 
         function openAddModal() {
@@ -147,41 +157,52 @@
             fetch(`/users/${id}`)
                 .then(res => res.json())
                 .then(user => {
-                    // isi form
                     document.getElementById('user_id').value = user.id;
                     document.getElementById('name').value = user.name;
                     document.getElementById('email').value = user.email;
                     document.getElementById('phone').value = user.phone ?? '';
                     document.getElementById('role').value = user.role;
 
-                    // buka modal
                     let modal = new bootstrap.Modal(document.getElementById('userModal'));
                     modal.show();
                 })
-                .catch(err => console.error(err));
+                .concatch(err => console.error(err));
         }
 
         function deleteUser(id) {
-            if (!confirm('Yakin mau hapus user ini?')) return;
+            Swal.fire({
+                title: 'Apakah Anda yakin?',
+                text: "Data ini akan dihapus!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Ya, hapus!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    fetch(`/users/${id}`, {
+                            method: 'DELETE',
+                            headers: {
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                'Accept': 'application/json'
+                            }
+                        })
+                        .then(async res => {
+                            let data = await res.json().catch(() => ({}));
 
-            fetch(`/users/${id}`, {
-                    method: 'DELETE',
-                    headers: {
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                        'Accept': 'application/json'
-                    }
-                })
-                .then(async res => {
-                    let data = await res.json();
+                            if (!res.ok) {
+                                throw new Error(data.message || 'Terjadi kesalahan server');
+                            }
 
-                    if (!res.ok) {
-                        alert(data.message || 'Gagal hapus user');
-                        return;
-                    }
-
-                    loadUsers(currentPage);
-                })
-                .catch(err => console.error(err));
+                            Swal.fire('Terhapus!', 'Data berhasil dihapus.', 'success');
+                            loadUsers(currentPage);
+                        })
+                        .catch(err => {
+                            Swal.fire('Gagal!', err.message || 'Gagal menghapus', 'error');
+                        });
+                }
+            });
         }
 
         function loadUsers(page = currentPage) {

@@ -51,6 +51,10 @@
         .table-responsive {
             overflow: visible !important;
         }
+
+        .swal2-container {
+            z-index: 9999;
+        }
     </style>
     <div class="layout-wrapper layout-content-navbar">
         <div class="layout-container">
@@ -87,6 +91,7 @@
 
     <!-- Place this tag in your head or just before your close body tag. -->
     <script async defer src="https://buttons.github.io/buttons.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const startDateInput = document.getElementById('start_date');
