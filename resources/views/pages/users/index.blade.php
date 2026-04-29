@@ -42,7 +42,7 @@
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">User Form</h5>
+                    <h5 class="modal-title" id="modalTitle">User Form</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
 
@@ -186,6 +186,8 @@
             document.getElementById('userForm').reset();
             document.getElementById('user_id').value = '';
 
+            document.getElementById('modalTitle').innerText = 'Add New User';
+
             let modal = new bootstrap.Modal(document.getElementById('userModal'));
             modal.show();
         }
@@ -199,6 +201,8 @@
                     document.getElementById('email').value = user.email;
                     document.getElementById('phone').value = user.phone ?? '';
                     document.getElementById('role').value = user.role;
+
+                    document.getElementById('modalTitle').innerText = 'Edit User: ' + user.name;
 
                     let modal = new bootstrap.Modal(document.getElementById('userModal'));
                     modal.show();
