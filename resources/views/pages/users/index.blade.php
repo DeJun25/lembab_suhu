@@ -19,7 +19,7 @@
                 <table class="table">
                     <thead>
                         <tr>
-                            <th>No</th>
+                            <th width="50">No</th>
                             <th>Name</th>
                             <th>Email</th>
                             <th>Role</th>
@@ -89,11 +89,48 @@
         </div>
     </div>
 
+    <div class="modal fade" id="userDetailModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">User Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <table class="table table-borderless">
+                        <tr>
+                            <th width="30%">Name</th>
+                            <td id="detail_name"></td>
+                        </tr>
+                        <tr>
+                            <th>Email</th>
+                            <td id="detail_email"></td>
+                        </tr>
+                        <tr>
+                            <th>Phone</th>
+                            <td id="detail_phone"></td>
+                        </tr>
+                        <tr>
+                            <th>Role</th>
+                            <td><span class="badge bg-label-primary" id="detail_role"></span></td>
+                        </tr>
+                        <tr>
+                            <th>Created At</th>
+                            <td id="detail_created"></td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <script>
         let currentPage = 1;
 
-        const isSuperAdmin = "{{ auth()->user()->role === 'super_admin' ? true : false }}";
+        const isSuperAdmin = "{{ auth()->user()->role === 'super_admin' ? 1 : 0 }}";
 
         document.getElementById('userForm').addEventListener('submit', function(e) {
             e.preventDefault();
@@ -205,6 +242,32 @@
             });
         }
 
+        function showUser(id) {
+            fetch(`/users/${id}`)
+                .then(res => res.json())
+                .then(user => {
+                    document.getElementById('detail_name').innerText = user.name;
+                    document.getElementById('detail_email').innerText = user.email;
+                    document.getElementById('detail_phone').innerText = user.phone ?? '-';
+                    document.getElementById('detail_role').innerText = user.role.toUpperCase();
+
+                    // Format tanggal jika ada (opsional)
+                    const date = new Date(user.created_at);
+                    document.getElementById('detail_created').innerText = date.toLocaleDateString('id-ID', {
+                        day: '2-digit',
+                        month: 'long',
+                        year: 'numeric'
+                    });
+
+                    let modal = new bootstrap.Modal(document.getElementById('userDetailModal'));
+                    modal.show();
+                })
+                .catch(err => {
+                    console.error(err);
+                    Swal.fire('Error', 'Gagal mengambil data detail', 'error');
+                });
+        }
+
         function loadUsers(page = currentPage) {
             currentPage = page;
             fetch(`/getallusers?page=${page}`)
@@ -216,10 +279,14 @@
                         rows = `<tr><td colspan="5" class="text-center">No data</td></tr>`;
                     } else {
                         data.data.forEach((user, index) => {
-                            let actionButtons = '';
+                            let actionButtons = `
+                                <button class="btn btn-icon btn-sm btn-outline-info" onclick="showUser(${user.id})" title="View Detail">
+                                    <i class="bx bx-show"></i>
+                                </button>
+                            `;
 
-                            if (isSuperAdmin) {
-                                actionButtons = `
+                            if (isSuperAdmin === "1") {
+                                actionButtons += `
                                     <div class="d-flex gap-1">
                                         <button class="btn btn-icon btn-sm btn-outline-warning" onclick="editUser(${user.id})">
                                             <i class="bx bx-edit-alt"></i>
@@ -227,7 +294,8 @@
                                         <button class="btn btn-icon btn-sm btn-outline-danger" onclick="deleteUser(${user.id})">
                                             <i class="bx bx-trash"></i>
                                         </button>
-                                    </div>`;
+                                    </div>
+                                `;
                             }
 
                             rows += `
@@ -236,7 +304,7 @@
                                     <td>${user.name}</td>
                                     <td>${user.email}</td>
                                     <td>${user.role}</td>
-                                    <td>${actionButtons}</td>
+                                    <td><div class="d-flex gap-1">${actionButtons}</div></td>
                                 </tr>
                             `;
                         });

@@ -102,7 +102,7 @@ class UserController extends Controller
             'email' => $request->email,
         ]);
 
-        return response()->json(['status' => 'success', 'message' => 'Profil diperbarui']);
+        return redirect()->back()->with('success', 'Profil berhasil diperbarui!');
     }
 
     public function updatePassword(Request $request)
@@ -121,9 +121,6 @@ class UserController extends Controller
             'password' => Hash::make($request->new_password)
         ]);
 
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Password berhasil diperbarui!'
-        ]);
+        return redirect()->back()->with('success', 'Password berhasil diganti!');
     }
 }

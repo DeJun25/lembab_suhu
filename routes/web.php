@@ -25,8 +25,8 @@ Route::middleware(['auth', SuperAdminMiddleware::class])->group(function () {
     Route::get('log-sensor', [SensorController::class, 'log_sensor'])->name('log_sensor');
     Route::get('data-sensor', [SensorController::class, 'data_sensor'])->name('data_sensor');
     route::get('profile', [UserController::class, 'profile'])->name('profile');
-    Route::post('/profile/update', [UserController::class, 'updateProfile'])->name('profile.update');
-    Route::post('/profile/password', [UserController::class, 'updatePassword'])->name('profile.password');
+    Route::put('/profile/update', [UserController::class, 'updateProfile'])->name('profile.update');
+    Route::patch('/profile/password', [UserController::class, 'updatePassword'])->name('profile.password');
 });
 
 Auth::routes();

@@ -55,9 +55,6 @@
     <script>
         let currentPage = 1;
 
-        /**
-         * Load data sensor dari server
-         */
         function loadSensorData(page = 1) {
             currentPage = page;
             const tableBody = document.getElementById('sensor-table');
@@ -120,9 +117,6 @@
                 });
         }
 
-        /**
-         * Render links pagination
-         */
         function renderPagination(links) {
             if (!links || links.length <= 3) {
                 document.getElementById('pagination-links').innerHTML = '';
@@ -153,8 +147,7 @@
             paginationHtml += `</ul>`;
             document.getElementById('pagination-links').innerHTML = paginationHtml;
         }
-
-        // Initial Load
+        
         document.addEventListener('DOMContentLoaded', () => {
             loadSensorData(currentPage);
         });
