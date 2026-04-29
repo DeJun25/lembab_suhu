@@ -26,6 +26,12 @@
                                     <input class="form-control" type="email" id="email" name="email"
                                         value="{{ auth()->user()->email }}" required />
                                 </div>
+                                <div class="mb-3 col-md-6">
+                                    <label for="email" class="form-label">Phone</label>
+                                    <input class="form-control" type="text" placeholder="0833851812" name="phone"
+                                        id="phone" oninput="this.value = this.value.replace(/[^0-9]/g, '')" inputmode="numeric"
+                                        pattern="[0-9]*" maxlength="15" value="{{ auth()->user()->phone }}" required/>
+                                </div>
                             </div>
                             <div class="mt-2">
                                 <button type="submit" id="btnUpdateProfile" class="btn btn-primary me-2">Save
