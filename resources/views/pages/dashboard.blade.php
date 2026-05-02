@@ -8,35 +8,6 @@
 @section('content')
     <div class="container-xxl flex-grow-1 container-p-y">
         <div class="row">
-            <div class="row mb-4">
-                <div class="col-4">
-                    <div class="card text-center">
-                        <div class="card-body">
-                            @php
-                                $rain = $data->rain_status ?? 1;
-                            @endphp
-
-                            <h4 class="mb-2">Rain Status</h4>
-
-                            @if ($rain == 1)
-                                <div class="d-flex justify-content-center align-items-center gap-2">
-                                    <i class="bx bx-cloud-rain bx-sm text-primary"></i>
-                                    <small class="mb-0">
-                                        Current: Hujan
-                                    </small>
-                                </div>
-                            @else
-                                <div class="d-flex justify-content-center align-items-center gap-2">
-                                    <i class="bx bx-sun bx-sm text-danger"></i>
-                                    <small class="mb-0">
-                                        Current: Tidak Hujan
-                                    </small>
-                                </div>
-                            @endif
-                        </div>
-                    </div>
-                </div>
-            </div>
             <!-- Order Statistics -->
             <div class="col-md-6 col-lg-4 col-xl-4 order-0 mb-4">
                 <div class="card h-100">

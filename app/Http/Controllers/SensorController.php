@@ -39,7 +39,6 @@ class SensorController extends Controller
             'humidity' => $request->humidity,
             'temperature' => $request->temperature,
             'soil_moisture' => $request->soil_moisture,
-            'rain_status' => '0',
         ]);
 
         return response()->json(['message' => 'Data sensor berhasil disimpan.'], 201);

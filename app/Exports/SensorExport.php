@@ -40,7 +40,6 @@ class SensorExport implements FromQuery, WithHeadings, ShouldAutoSize, WithStyle
             $item->temperature . ' °C',
             $item->humidity . ' %',
             $item->soil_moisture . ' %',
-            $item->rain_status == 1 ? 'Hujan' : 'Tidak Hujan',
         ];
     }
 

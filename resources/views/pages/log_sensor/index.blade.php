@@ -36,7 +36,6 @@
                             <th>Humidity</th>
                             <th>Temperature</th>
                             <th>Soil Moisture</th>
-                            <th>Rain Status</th>
                         </tr>
                     </thead>
                     <tbody id="sensor-table">
@@ -95,11 +94,6 @@
                                 <td>
                                     <span class="badge ${soilBadge}">
                                         ${sensor.soil_moisture}%
-                                    </span>
-                                </td>
-                                <td>
-                                    <span class="badge ${sensor.rain_status === 'rain' ? 'bg-label-danger' : 'bg-label-success'}">
-                                        ${sensor.rain_status === 'rain' ? 'Rain' : 'No Rain'}
                                     </span>
                                 </td>
                             </tr>

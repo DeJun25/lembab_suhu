@@ -12,6 +12,5 @@ class SensorData extends Model
         'humidity',
         'temperature',
         'soil_moisture',
-        'rain_status',
     ];
 }
