@@ -16,7 +16,6 @@ return new class extends Migration
             $table->float('humidity');
             $table->float('temperature');
             $table->integer('soil_moisture');
-            $table->tinyInteger('rain_status');
             $table->timestamps();
         });
     }

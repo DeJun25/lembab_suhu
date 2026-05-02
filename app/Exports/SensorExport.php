@@ -50,7 +50,6 @@ class SensorExport implements FromQuery, WithHeadings, ShouldAutoSize, WithStyle
             'Temperature',
             'Humidity',
             'Soil Moisture',
-            'Rain Status'
         ];
     }
 
